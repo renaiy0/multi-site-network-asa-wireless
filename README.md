@@ -154,8 +154,6 @@ This topology is designed to understand:
 ## 👥 Development Team
 Telkom Exponential Topology Project
 
-## 📞 Contact & Support
-For questions or issues, please contact the network administrator team.
 
 ---
 
