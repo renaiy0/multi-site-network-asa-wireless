@@ -1,336 +1,486 @@
-# Telkom Exponential Topology
+# Enterprise Multi-Site Network Infrastructure
 
-<div align="center">
+## Overview
+This repository contains a comprehensive enterprise network design implementing advanced routing protocols, security features, and multi-site connectivity. The network demonstrates real-world enterprise architecture with WAN connectivity, multiple campus locations, wireless infrastructure, and layered security.
 
-![Network Topology](assets-cisc/topology.png)
+![Network Topology](assets/full-topology.png)
 
-*Enterprise-scale network infrastructure with 10 interconnected rooms*
+## Network Architecture
 
-[![Cisco Packet Tracer](https://img.shields.io/badge/Cisco-Packet_Tracer-1BA0D7?style=for-the-badge&logo=cisco&logoColor=white)](https://www.netacad.com/courses/packet-tracer)
-[![In Progress](https://img.shields.io/badge/Status-In_Progress-yellow?style=for-the-badge)](https://github.com)
-[![OSPF](https://img.shields.io/badge/Routing-OSPF-green?style=for-the-badge)](https://github.com)
+### Core Components
+- **Main Router (WHM)** - Primary WAN aggregation and routing
+- **Secondary Router (WHC)** - Redundant WAN connectivity  
+- **Secure Router (SER)** - Security edge router with ASA0 firewall
+- **Cloud Connection** - Internet/ISP connectivity via Se0/0
 
-</div>
+### Site Locations
 
----
+#### 1. **RUANGAN WH RC/MT** (Yellow Zone - Main Office)
+- **Network**: 192.168.111.1/24
+- **Subnet**: 10.10.10.1
+- **Equipment**:
+  - 2960-24TT Switch1
+  - Server-PT (10.10.10.10)
+  - Access Point-PT-N (Access Point2)
+  - 2 Laptop endpoints (Laptop0, Laptop1)
 
-## 📋 Project Overview
+#### 2. **RUANGAN MT** (Purple Zone - Marketing/IT)
+- **Network**: 192.168.112.1/24
+- **Equipment**:
+  - Access Point-PT-N (Access Point3)
+  - Multiple PC endpoints (PC-PT PC7-PC14)
+  - IP Phone0 (7960)
+  - Wireless connectivity for mobile users
 
-A comprehensive enterprise network simulation featuring **10 interconnected rooms** with advanced networking technologies. This project demonstrates the implementation of DHCP, DHCP Relay, OSPF dynamic routing, and wireless connectivity across a large-scale infrastructure. Built with Cisco Packet Tracer, it showcases real-world network design principles including centralized IP management, automatic route discovery, and wireless integration for mobility.
+#### 3. **RUANGAN CCNA** (Red Zone - Training/Lab)
+- **Network**: 192.168.100.1/24
+- **Equipment**:
+  - 2960-24TT Switch (central)
+  - Multiple switches (PC-PT PC15-PC19)
+  - Access Point-PT-N (Access Point1, Access Point0)
+  - Printer-PT infrastructure
+  - PC endpoints (PC-PT PC2, PC3, PC4)
 
-### 🎯 Key Features
-- 🏢 **10 Interconnected Rooms** - Large-scale enterprise simulation
-- 🌐 **Dynamic Routing** - OSPF implementation for automatic route discovery
-- 📡 **Wireless Network** - Multiple access points for seamless connectivity
-- 🔄 **DHCP & DHCP Relay** - Centralized IP address management
-- 🔐 **Scalable Architecture** - Enterprise-grade network design
+#### 4. **RUANGAN WAREHOUSE** (Blue Zone - Storage/Operations)
+- **Network**: 192.168.101.1/24
+- **Equipment**:
+  - Access Point-PT-N (Access Point1)
+  - PC endpoints (PC-PT PC5, PC6)
+  - Printer-PT (Printer1)
 
-## 🏗️ Network Architecture
+## Routing Protocols Implemented
 
-![Cisco Configuration](assets-cisc/cisco.pkt)
+### OSPF (Open Shortest Path First)
+- Deployed across core infrastructure
+- Area 0 (backbone) configuration
+- Fast convergence for internal routing
+- Link-state routing for optimal path selection
 
-### Topology Structure
+### VLAN Routing
+- Inter-VLAN routing via router-on-a-stick or L3 switching
+- Multiple VLANs for network segmentation
+- Subnet isolation for security
 
-The network consists of **10 rooms/segments**, with the primary visible sections being:
+### Static Routing
+- Used for specific routes where needed
+- Backup routes configuration
+- Default gateway configurations
 
+## Advanced Features Implemented
+
+### 1. Access Control Lists (ACL)
+```cisco
+! Example ACL configuration
+access-list 100 permit ip 192.168.111.0 0.0.0.255 any
+access-list 100 deny ip any any
 ```
-                        ┌──────────────┐
-                        │  MAINROUTER  │
-                        │    Se3/0     │
-                        └──────┬───────┘
-                               │
-                ┌──────────────┴──────────────┐
-                │                             │
-         172.17.1.10                    172.16.1.10
-                │                             │
-        ┌───────┴────────┐           ┌────────┴───────┐
-        │   Router-PT    │           │   Router-PT    │
-        │   WH RC Area   │           │  WH&CCNA Area  │
-        └───────┬────────┘           └────────┬───────┘
-                │                             │
-        ┌───────┴────────┐           ┌────────┴────────┐
-        │  RUANGAN WH RC │           │  RUANGAN CCNA   │
-        │  (Yellow Zone) │           │  (Pink Zone)    │
-        └────────────────┘           └─────────┬───────┘
-                                              │
-                                     ┌────────┴────────┐
-                                     │ RUANGAN WAREHOUSE│
-                                     │   (Blue Zone)   │
-                                     └─────────────────┘
-```
+Deployed for traffic filtering and security policies
 
-### Room Layout
+![ACL Configuration](assets/acl-config.png)
 
-1. **RUANGAN WH RC** (Yellow Zone) - Work-from-Home & Remote Connection Area
-2. **RUANGAN CCNA** (Pink Zone) - Main training/office area
-3. **RUANGAN WAREHOUSE** (Blue Zone) - Storage and logistics area
-4. **Room 4-10** - Additional segments (in progress)
+### 2. ASA Firewall (ASA0 on 5506-X)
+- Positioned at security perimeter
+- Zone-based security
+- Stateful packet inspection
+- NAT/PAT configuration
 
-> **Note**: Complete topology documentation for all 10 rooms is being finalized.
+### 3. Wireless Network
+- Multiple Access Points for coverage
+- Centralized management
+- Secure authentication (WPA2/WPA3)
+- SSID segmentation
 
-## 🖥️ Network Devices
+![Wireless Configuration](assets/wireless-config.png)
 
-### Core Infrastructure
+### 4. DHCP Services
+- Centralized DHCP server (10.10.10.10)
+- DHCP pools per VLAN/subnet
+- IP address management
+- Option 150 for IP phones
 
-#### Routers
-- **MAINROUTER** - Primary gateway to internet/WAN (Se3/0)
-- **Central Router (Se2/0)** - Main distribution router
-- **Router-PT WH RC** - Handles WH RC area routing
-- **Router-PT WH&CCNA** - Manages CCNA and Warehouse areas
+### 5. DHCPv6 + DHCPD
+- IPv6 addressing support
+- Dual-stack configuration
+- Stateless/Stateful DHCPv6
 
-#### Switches
-- **Switch 2960-24TT** - Core switch in WH RC area
-- **Multiple Distribution Switches** - Connecting all segments
+### 6. Encapsulation
+- 802.1Q VLAN tagging on trunks
+- PPP/HDLC on WAN links
+- GRE tunnels (if applicable)
 
-### End Devices by Room
+## Network Segmentation
 
-#### RUANGAN WH RC (Yellow Zone)
-- 2x Laptop-PT (Laptop0, Laptop1)
-- 1x Server-PT (IP: 10.10.10.10)
-- 1x Access Point-PT (Access Point2)
+### IP Addressing Scheme
 
-#### RUANGAN CCNA (Pink Zone)
-- 4x PC-PT (PC1, PC2, PC3, PC4)
-- 1x Printer-PT (Printer0)
-- 1x Access Point-PT (Access Point0)
+| Location | Network | Gateway | VLAN |
+|----------|---------|---------|------|
+| WH RC/MT | 192.168.111.0/24 | 192.168.111.1 | - |
+| MT | 192.168.112.0/24 | 192.168.112.1 | - |
+| CCNA | 192.168.100.0/24 | 192.168.100.1 | - |
+| Warehouse | 192.168.101.0/24 | 192.168.101.1 | - |
+| Core Network | 10.10.10.0/24 | 10.10.10.1 | - |
+| WAN Link 1 | 30.30.30.0/24 | - | - |
+| WAN Link 2 | 20.20.20.0/24 | - | - |
+| SER Connection | 192.168.70.0/24 | 192.168.70.1 | - |
+| External WAN | 172.17.1.0/24 | - | - |
+| External WAN 2 | 172.16.1.1/24 | - | - |
 
-#### RUANGAN WAREHOUSE (Blue Zone)
-- 2x PC-PT (PC5, PC6)
-- 1x Printer-PT (Printer1)
-- 1x Access Point-PT (Access Point1)
+## WAN Connectivity
 
-**Total Estimated Devices**: 50+ endpoints across 10 rooms
+### Dual WAN Configuration
+- **WHM Router**: Primary WAN connection
+  - Serial interfaces (Se2/0, Se3/0)
+  - GigabitEthernet connections (Gig1/1, Gig1/2, Gig1/3)
+- **WHC Router**: Secondary/backup WAN
+  - Redundant connectivity
+  - Load balancing capability
+  
+### Internet Access
+- Cloud-PT connection via Se0/0
+- Public IP addressing
+- NAT/PAT at border
 
-## 📊 IP Addressing Scheme
+![WAN Configuration](assets/wan-config.png)
 
-### Subnet Allocation
+## Security Implementation
 
-| Room | Network Address | Gateway | VLAN | Description |
-|------|----------------|---------|------|-------------|
-| **WH RC** | `172.17.1.0/24` | 172.17.1.1 | - | Remote work area |
-| **CCNA** | `172.16.1.0/24` | 172.16.1.1 | - | Training/office |
-| **Management** | `10.10.10.0/24` | 10.10.10.1 | - | Server & admin |
-| **Warehouse** | `29x.x.x.x/24` | - | - | Storage area |
-| **Rooms 4-10** | TBD | TBD | TBD | In progress |
+### Layered Security Model
 
-### Key IP Addresses
-- **MAINROUTER Se3/0**: Gateway interface
-- **Server-PT**: `10.10.10.10`
-- **WH RC Router**: `172.17.1.10` ↔ `172.17.1.1`
-- **CCNA Router**: `172.16.1.10` ↔ `172.16.1.1`
+**Layer 1: Perimeter Security**
+- ASA0 firewall (Cisco ASA 5506-X)
+- Edge ACLs on border routers
+- DMZ configuration
 
-## 🔧 Implemented Technologies
-
-### 1. DHCP (Dynamic Host Configuration Protocol)
-- Automatic IP address assignment
-- Centralized IP management across all rooms
-- Reduced manual configuration errors
-- Dynamic lease management
-
-### 2. DHCP Relay
-- Forward DHCP requests across different subnets
-- Enable centralized DHCP server for multiple networks
-- Optimize network resource utilization
-- Support for multi-site deployments
-
-### 3. OSPF (Open Shortest Path First)
-- Dynamic routing protocol (Link-state)
-- Automatic route discovery and updates
-- Fast convergence for network redundancy
-- Scalable for large enterprise networks
-- Area-based hierarchical design
-
-### 4. Wireless Network
-- Multiple Access Points for comprehensive coverage
-- Wireless connectivity for mobility
-- Support for laptops and mobile devices
-- Seamless roaming between access points
-
-## 🚀 Implementation Status
-
-### ✅ Completed
-- Basic topology design
-- Physical device placement
-- Initial IP addressing scheme
-- Core router configuration
-- Primary room setup (3/10 rooms)
-
-### 🔄 In Progress
-- DHCP server configuration
-- DHCP relay setup on distribution routers
-- OSPF routing implementation
-- Wireless network configuration
-- Remaining 7 rooms setup
+**Layer 2: Access Security**
+- Port security on switches
+- 802.1X authentication (if enabled)
 - VLAN segmentation
 
-### 📝 Future Plans
-- Complete all 10 rooms deployment
-- Inter-room connectivity testing
-- VLAN implementation for security
-- Access Control Lists (ACL)
-- Quality of Service (QoS) configuration
-- Network monitoring tools
-- Redundancy and failover testing
-- Documentation completion
+**Layer 3: Network Security**
+- ACLs on router interfaces
+- Private VLAN implementation
+- Anti-spoofing measures
 
-## 🛠️ Configuration Guide
+**Layer 4: Application Security**
+- Stateful inspection
+- Application-layer filtering
+- Traffic shaping/QoS
 
-### Prerequisites
-- Cisco Packet Tracer 7.x or newer
-- Basic networking knowledge
-- Understanding of routing protocols
-- Familiarity with Cisco IOS commands
+![Security Architecture](assets/security-config.png)
 
-### DHCP Server Configuration
+## VoIP Implementation
 
-```cisco
-Router(config)# ip dhcp pool POOL_NAME
-Router(dhcp-config)# network 172.17.1.0 255.255.255.0
-Router(dhcp-config)# default-router 172.17.1.1
-Router(dhcp-config)# dns-server 8.8.8.8
-Router(dhcp-config)# exit
-
-! Exclude gateway and server IPs
-Router(config)# ip dhcp excluded-address 172.17.1.1 172.17.1.10
-```
-
-### DHCP Relay Configuration
+### IP Telephony Features
+- Cisco IP Phone 7960 deployed
+- Voice VLAN configuration
+- QoS for voice traffic
+- DHCP Option 150 for TFTP
+- Separate voice and data VLANs
 
 ```cisco
-Router(config)# interface FastEthernet0/0
-Router(config-if)# ip helper-address 10.10.10.10
-Router(config-if)# exit
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 10
+ switchport voice vlan 20
+ spanning-tree portfast
 ```
+
+## Wireless Infrastructure
+
+### Access Point Deployment
+- **Access Point2** (WH RC/MT) - Main office coverage
+- **Access Point3** (MT) - Marketing/IT area
+- **Access Point1** (CCNA + Warehouse) - Lab and warehouse coverage
+- **Access Point0** (CCNA) - Additional CCNA lab coverage
+
+### Wireless Security
+- WPA2-Enterprise or WPA2-PSK
+- MAC filtering (optional)
+- Guest network isolation
+- Bandwidth management
+
+## Configuration Examples
 
 ### OSPF Configuration
-
 ```cisco
-Router(config)# router ospf 1
-Router(config-router)# network 172.17.1.0 0.0.0.255 area 0
-Router(config-router)# network 172.16.1.0 0.0.0.255 area 0
-Router(config-router)# network 10.10.10.0 0.0.0.255 area 0
-Router(config-router)# exit
+router ospf 1
+ network 192.168.111.0 0.0.0.255 area 0
+ network 192.168.112.0 0.0.0.255 area 0
+ network 192.168.100.0 0.0.0.255 area 0
+ network 192.168.101.0 0.0.0.255 area 0
+ network 10.10.10.0 0.0.0.255 area 0
+ passive-interface default
+ no passive-interface GigabitEthernet0/0
 ```
 
-### Wireless Access Point Setup
-
+### Inter-VLAN Routing
 ```cisco
-! On Access Point
-AP(config)# dot11 ssid TELKOM-WIFI
-AP(config-ssid)# authentication open
-AP(config-ssid)# exit
-
-AP(config)# interface Dot11Radio0
-AP(config-if)# ssid TELKOM-WIFI
-AP(config-if)# no shutdown
+interface GigabitEthernet0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.111.1 255.255.255.0
+ 
+interface GigabitEthernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.112.1 255.255.255.0
 ```
 
-## 🧪 Testing & Verification
+### DHCP Configuration
+```cisco
+ip dhcp pool VLAN10
+ network 192.168.111.0 255.255.255.0
+ default-router 192.168.111.1
+ dns-server 8.8.8.8
+ option 150 ip 10.10.10.10
+
+ip dhcp pool VLAN20
+ network 192.168.112.0 255.255.255.0
+ default-router 192.168.112.1
+ dns-server 8.8.8.8
+```
+
+### ASA Firewall Basic Config
+```cisco
+interface GigabitEthernet1/1
+ nameif outside
+ security-level 0
+ ip address 192.168.70.1 255.255.255.0
+
+interface GigabitEthernet1/2
+ nameif inside
+ security-level 100
+ ip address 192.168.100.1 255.255.255.0
+
+access-list outside_in extended permit icmp any any
+access-list outside_in extended permit tcp any any eq 80
+access-list outside_in extended permit tcp any any eq 443
+```
+
+## High Availability Features
+
+### Redundancy Mechanisms
+- Dual WAN connections (WHM and WHC)
+- Multiple router paths
+- OSPF automatic failover
+- Redundant access points
+- Multiple switches for distribution
+
+### Backup and Recovery
+- Configuration backups
+- TFTP server (10.10.10.10)
+- Disaster recovery procedures
+
+## Quality of Service (QoS)
+
+### Traffic Prioritization
+1. Voice (IP Phone) - Highest priority
+2. Critical data - High priority
+3. Business applications - Medium priority
+4. Guest/Internet traffic - Low priority
+
+```cisco
+class-map match-any VOICE
+ match ip dscp ef
+ 
+policy-map QOS-POLICY
+ class VOICE
+  priority percent 30
+  
+interface GigabitEthernet0/0
+ service-policy output QOS-POLICY
+```
+
+## Monitoring and Management
+
+### Network Management
+- SNMP monitoring
+- Syslog server configuration
+- NetFlow for traffic analysis
+- Remote access via SSH
 
 ### Verification Commands
-
 ```cisco
-! Check DHCP bindings
-Router# show ip dhcp binding
-
-! Verify OSPF neighbors
-Router# show ip ospf neighbor
-
-! Check routing table
-Router# show ip route
-
-! Verify interfaces
-Router# show ip interface brief
-
-! Check wireless associations
-AP# show dot11 associations
+show ip interface brief
+show ip route
+show ip ospf neighbor
+show vlan brief
+show interfaces trunk
+show access-lists
+show crypto isakmp sa
+show ip dhcp binding
+show wireless client
 ```
+
+## Repository Structure
+```
+.
+├── assets/
+│   ├── full-topology.png
+│   ├── acl-config.png
+│   ├── wan-config.png
+│   ├── security-config.png
+│   ├── wireless-config.png
+│   ├── ospf-config.png
+│   ├── dhcp-config.png
+│   └── vlan-config.png
+├── configs/
+│   ├── mainrouter-whm.txt
+│   ├── router-whc.txt
+│   ├── router-ser.txt
+│   ├── asa0-firewall.txt
+│   ├── switch1-config.txt
+│   ├── switch2-config.txt
+│   └── accesspoint-configs.txt
+├── documentation/
+│   ├── network-design.pdf
+│   ├── addressing-plan.xlsx
+│   └── security-policy.pdf
+└── README.md
+```
+
+## Technologies Used
+
+- **Routing Protocols**: OSPF, Static Routes
+- **Security**: ACLs, ASA Firewall, Port Security
+- **WAN**: Serial connections, GRE tunnels
+- **LAN**: VLANs, STP, EtherChannel
+- **Wireless**: 802.11n/ac, WPA2, Multiple APs
+- **Services**: DHCP, DHCPv6, DNS
+- **VoIP**: IP Telephony, QoS
+- **Management**: SSH, SNMP, Syslog
+
+## Learning Objectives
+
+This lab demonstrates:
+1. Enterprise network design principles
+2. Multi-site connectivity and WAN routing
+3. Advanced routing protocol implementation (OSPF)
+4. Comprehensive security architecture
+5. Wireless network deployment
+6. VoIP integration and QoS
+7. High availability and redundancy
+8. Network segmentation and isolation
+9. Centralized services (DHCP, DNS)
+10. Firewall configuration and management
+
+## Testing Procedures
 
 ### Connectivity Tests
+```cisco
+! Test inter-VLAN routing
+ping 192.168.112.1 source 192.168.111.1
 
-```bash
-# From any PC
-ping 10.10.10.10          # Test server connectivity
-ping 172.17.1.1           # Test gateway
-tracert 172.16.1.1        # Trace route to CCNA room
-ipconfig /all             # Verify DHCP assignment
+! Test OSPF neighbors
+show ip ospf neighbor
+
+! Test WAN connectivity
+ping 172.17.1.10
+ping 172.16.1.1
+
+! Test ACL functionality
+show access-lists
+show ip access-lists
+
+! Test wireless connectivity
+show wireless client summary
 ```
 
-## 📚 Learning Objectives
+### Performance Tests
+- Bandwidth testing between sites
+- Latency measurements
+- Voice quality testing
+- Failover testing
 
-This topology is designed to demonstrate:
-- Enterprise network design principles
-- Multi-site routing protocol implementation
-- Centralized DHCP service management
-- Wireless network integration
-- Network scalability and redundancy
-- Hierarchical network architecture
-- IP addressing and subnetting
-- Inter-VLAN routing (planned)
-- Network troubleshooting methodologies
+## Troubleshooting Guide
 
-## 🎯 Use Cases
+### Common Issues and Solutions
 
-Perfect for learning:
-- **Network Administration** - Managing large-scale networks
-- **CCNA Certification** - Hands-on practice for exam topics
-- **Enterprise IT** - Real-world deployment scenarios
-- **Network Design** - Scalable architecture patterns
-- **Troubleshooting** - Complex multi-room connectivity issues
+**Issue**: No connectivity between VLANs
+- Check inter-VLAN routing configuration
+- Verify VLAN assignments on switch ports
+- Check router subinterface configuration
 
-```
+**Issue**: OSPF neighbor not forming
+- Verify network statements
+- Check interface IP addresses
+- Verify area configuration
+- Check for ACLs blocking OSPF
 
-## 🔍 Troubleshooting
+**Issue**: DHCP not working
+- Check DHCP pool configuration
+- Verify ip helper-address on SVIs
+- Check DHCP server reachability
 
-### Common Issues
+**Issue**: Wireless clients cannot connect
+- Verify SSID configuration
+- Check authentication settings
+- Verify AP connectivity to controller
 
-**DHCP not working**
-- ✅ Verify DHCP pool configuration
-- ✅ Check DHCP relay (ip helper-address)
-- ✅ Ensure no IP conflicts
-- ✅ Verify excluded addresses
+## Best Practices Implemented
 
-**OSPF neighbors not forming**
-- ✅ Check network statements
-- ✅ Verify interface is not passive
-- ✅ Confirm matching area IDs
-- ✅ Check interface status (up/up)
+✅ **Network Design**
+- Hierarchical network model (Core, Distribution, Access)
+- Proper IP addressing scheme
+- Network segmentation by function
 
-**Wireless connectivity issues**
-- ✅ Verify SSID configuration
-- ✅ Check Access Point power
-- ✅ Confirm wireless adapter settings
-- ✅ Check for channel interference
+✅ **Security**
+- Defense in depth strategy
+- ACLs at multiple layers
+- Secure management access (SSH only)
+- Port security on access ports
 
-**Inter-room communication failing**
-- ✅ Verify routing table entries
-- ✅ Check router interfaces status
-- ✅ Test connectivity hop-by-hop
-- ✅ Verify ACLs (if configured)
+✅ **Redundancy**
+- Dual WAN connections
+- Multiple routing paths
+- Redundant access points
 
-## 👥 Contributors
+✅ **Scalability**
+- Modular design
+- OSPF for dynamic routing
+- Room for growth in each subnet
 
-**renaiy0** - Network Engineer & Project Lead
+✅ **Documentation**
+- Network diagrams
+- IP address documentation
+- Configuration standards
 
-## 📞 Support
+## Future Enhancements
 
-For questions or issues:
-- Open an issue on GitHub
-- Contact network administrator team
-- Check Cisco Packet Tracer documentation
+Potential additions to consider:
+- IPv6 full deployment
+- SD-WAN implementation
+- Network automation (Python, Ansible)
+- Advanced monitoring (PRTG, SolarWinds)
+- VPN remote access
+- Additional security layers (IPS/IDS)
 
-## 📝 License
+## Lab Environment
 
-This project is for educational purposes.
+- **Platform**: Cisco Packet Tracer / GNS3 / EVE-NG
+- **Routers**: Cisco ISR series
+- **Switches**: Cisco Catalyst 2960 series
+- **Firewall**: Cisco ASA 5506-X
+- **Wireless**: Lightweight APs
+- **IP Phones**: Cisco 7960
+
+## Getting Started
+
+1. Review the complete network topology
+2. Understand the IP addressing scheme
+3. Study the routing configuration
+4. Examine security implementations
+5. Test connectivity between all sites
+6. Verify redundancy mechanisms
+7. Document any changes made
+
+## License
+Educational/Training purposes
+
+## Contact & Support
+
+For questions or issues with this network design:
+- Review the configuration files in `/configs`
+- Check the documentation in `/documentation`
+- Test using verification commands provided
 
 ---
-
-<div align="center">
-
-**Status**: 🔧 In Progress (3/10 Rooms Completed)  
-**Last Updated**: November 2025  
-**Version**: 1.0 - Development Phase
-
-Made with ☕ by renaiy0
-
-</div>
+*This enterprise network demonstrates industry-standard design patterns and best practices for multi-site connectivity, security, and high availability.*
