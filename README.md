@@ -3,7 +3,7 @@
 ## Overview
 This repository contains a comprehensive enterprise network design implementing advanced routing protocols, security features, and multi-site connectivity. The network demonstrates real-world enterprise architecture with WAN connectivity, multiple campus locations, wireless infrastructure, and layered security.
 
-![Network Topology](assets/full-topology.png)
+![Network Topology](assets/topology.png)
 
 ## Network Architecture
 
